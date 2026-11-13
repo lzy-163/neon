@@ -1,0 +1,79 @@
+name: BFP isolated verification 34596d5b2de2
+'on':
+  push:
+    branches:
+    - bfp-isolated-34596d5b2de2
+permissions: {}
+jobs:
+  buggy:
+    runs-on: ubuntu-latest
+    steps:
+    - id: pg_v14_rev
+      run: echo "pg_rev=fixture" >> "$GITHUB_OUTPUT"
+    - id: pg_v15_rev
+      run: echo "pg_rev=fixture" >> "$GITHUB_OUTPUT"
+    - run: echo fixture > Makefile
+    - name: Check cache key 1
+      env:
+        KEY: v1-${{ runner.os }}-${{ matrix.build_type }}-pg-${{ steps.pg_v14_rev.outputs.pg_rev }}-${{ hashFiles('Makefile')
+          }}
+      run: 'printf "cache key=%s
+
+        " "$KEY"
+
+        [[ "$KEY" == *-"$BUILD_TYPE"-pg-* ]]'
+    - name: Check cache key 2
+      env:
+        KEY: v1-${{ runner.os }}-${{ matrix.build_type }}-pg-${{ steps.pg_v15_rev.outputs.pg_rev }}-${{ hashFiles('Makefile')
+          }}
+      run: 'printf "cache key=%s
+
+        " "$KEY"
+
+        [[ "$KEY" == *-"$BUILD_TYPE"-pg-* ]]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - build_type: ''
+          actual: release
+        - build_type: ''
+          actual: debug
+    env:
+      BUILD_TYPE: ${{ matrix.actual }}
+  human:
+    runs-on: ubuntu-latest
+    steps:
+    - id: pg_v14_rev
+      run: echo "pg_rev=fixture" >> "$GITHUB_OUTPUT"
+    - id: pg_v15_rev
+      run: echo "pg_rev=fixture" >> "$GITHUB_OUTPUT"
+    - run: echo fixture > Makefile
+    - name: Check cache key 1
+      env:
+        KEY: v1-${{ runner.os }}-${{ env.BUILD_TYPE }}-pg-${{ steps.pg_v14_rev.outputs.pg_rev }}-${{ hashFiles('Makefile')
+          }}
+      run: 'printf "cache key=%s
+
+        " "$KEY"
+
+        [[ "$KEY" == *-"$BUILD_TYPE"-pg-* ]]'
+    - name: Check cache key 2
+      env:
+        KEY: v1-${{ runner.os }}-${{ env.BUILD_TYPE }}-pg-${{ steps.pg_v15_rev.outputs.pg_rev }}-${{ hashFiles('Makefile')
+          }}
+      run: 'printf "cache key=%s
+
+        " "$KEY"
+
+        [[ "$KEY" == *-"$BUILD_TYPE"-pg-* ]]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - build_type: ''
+          actual: release
+        - build_type: ''
+          actual: debug
+    env:
+      BUILD_TYPE: ${{ matrix.actual }}
